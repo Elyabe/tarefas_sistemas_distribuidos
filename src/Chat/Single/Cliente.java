@@ -1,9 +1,12 @@
 package Chat.Single;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 public class Cliente {
     
@@ -27,21 +30,43 @@ public class Cliente {
 	
 	public void conectarServidor() throws UnknownHostException, IOException
 	{
+		
 		this.socket = new Socket(this.ip, this.porta);
 		
 		System.out.println("Cliente conseguiu se conectar!");
 
-        Scanner teclado = new Scanner(System.in);
-        PrintStream saida = new PrintStream(socket.getOutputStream());
+		BufferedReader entrada = new BufferedReader(new InputStreamReader(System.in));
 
-        while (teclado.hasNextLine()) {
-            saida.println(teclado.nextLine());
-        }
-
-        saida.close();
-        teclado.close();
-        socket.close();
-
+//		Enviando para cliente
+		OutputStream streamSaida = socket.getOutputStream(); 
+		PrintWriter saida = new PrintWriter(streamSaida, true);
+		
+//		Para receber msg do servidor
+		InputStream streamEntrada = socket.getInputStream();
+		BufferedReader leitorReceptor = new BufferedReader(new InputStreamReader(streamEntrada));
+		
+		System.out.println("Cliente pronto.");
+		
+		String msgRecebida;
+		String msgEnviar;     
+		
+		boolean escutar = true;
+		
+		while(escutar)
+		{
+			msgEnviar = entrada.readLine();  
+			saida.println(msgEnviar);       
+			saida.flush();                    
+			if((msgRecebida = leitorReceptor.readLine()) != null) 
+			{
+				System.out.println(msgRecebida); 
+			}
+			
+			if ( msgEnviar.length() == 0 )
+				escutar = false;
+		}   
+		
+		System.out.println("Cliente saiu da conversa.");
 	}
 	
 	

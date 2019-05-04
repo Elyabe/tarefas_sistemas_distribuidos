@@ -1,8 +1,12 @@
 package Chat.Single;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Servidor {
 	private int porta;
@@ -24,19 +28,29 @@ public class Servidor {
     	 this.socket = new ServerSocket(this.porta);
          System.out.println("Ouvindo na porta " + this.porta );
 
-         Socket cliente = socket.accept();
-         
-         System.out.println("Cliente " + cliente.getInetAddress().getHostAddress() + " conectado");
+         System.out.println("Servidor pronto:");
+         Socket cliente = socket.accept( );                          
+                          
+//       Lendo do teclado
+         BufferedReader leitorEntrada = new BufferedReader(new InputStreamReader(System.in));
+   	                      
+//       Enviando ao cliente
+         OutputStream streamSaida = cliente.getOutputStream(); 
+         PrintWriter saida = new PrintWriter(streamSaida, true);
+    
+//       Para receber mensagem do cliente  
+         InputStream istream = cliente.getInputStream();
+         BufferedReader leitorReceptor = new BufferedReader(new InputStreamReader(istream));
+    
+         String msgRecebida, msgEnviar;               
+         while(true)
+         {
+           if((msgRecebida = leitorReceptor.readLine()) != null)  
+              System.out.println(msgRecebida);         
 
-        // Exibindo mensagem 
-         Scanner entrada = new Scanner(cliente.getInputStream());
-         while (entrada.hasNextLine()) {
-             System.out.println(entrada.nextLine());
-         }
-
-         entrada.close();
-         socket.close();
-
-     }
-     
+           msgEnviar = leitorEntrada.readLine(); 
+           saida.println(msgEnviar);             
+           saida.flush();
+         }               
+       }   
      }
